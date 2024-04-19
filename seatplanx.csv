@@ -1,5 +1,5 @@
 Seat,Status
-1A,Reserved
+1A,Free
 2A,Free
 3A,Free
 4A,Free
@@ -78,7 +78,7 @@ Seat,Status
 77A,Free
 78A,Free
 79A,Free
-80A,Reserved
+80A,Free
 1B,Free
 2B,Free
 3B,Free
