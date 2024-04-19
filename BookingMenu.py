@@ -1,4 +1,5 @@
 import pandas as pd
+
 pd.read_csv('/Users/sylvin/PycharmProjects/Project temp/seatplanx.csv')
 
 
@@ -69,6 +70,7 @@ class SeatBooking:
         for seat, row in self.seats.iterrows():
             print(f"{seat}:{row['Status']}")
 
+
 # main menu tied to csv file to append changes saved to the file (if any)
 def main_menu(csv_file_path):
     booking_system = SeatBooking(csv_file_path)
@@ -86,35 +88,54 @@ def main_menu(csv_file_path):
 
         # option 1 for checking of seat
         if choice == '1':
+            # checking of individual seat by row (number) and column (letter)
             seat_label = input("Enter seat label (e.g., '1A'): ")
+            # condition if seat is not booked
             if booking_system.check_availability(seat_label):
                 print("The seat is available.")
+            # condition if seat is booked
             else:
                 print("Sorry this seat is not available.")
+
         # option 2 to book seat
         elif choice == '2':
+            # request for user input on which seat they intend to book
             seat_label = input("Enter seat label (e.g., '1A'): ")
+            # if input seat is a seat that is available for booking
+            # change status from Free to Reserved
             if booking_system.book_seat(seat_label):
                 print("The seat has been booked.")
+            # conditional statement if the seat had already been booked
             else:
                 print("Sorry this seat has already been booked.")
+
         # option 3 to cancel booking and free up the seat
         elif choice == '3':
+            # request for user input on which seat they had booked
             seat_label = input("Enter seat label (e.g., '1A'): ")
+            # if input seat is a seat that has been booked
+            # change status from Reserved to Free
             if booking_system.free_seat(seat_label):
                 print("The seat has been freed.")
+            # conditional statement if the seat was not booked
             else:
                 print("Sorry this seat is not booked.")
+
         # option 4 to show all current bookings
+        # allows for the viewing of which seats have been booked
         elif choice == '4':
             booking_system.show_booking_state()
+
         # option 5 to exit program
+        # option to be selected when all other options have been used to user satisfaction
         elif choice == '5':
             print("Thank you for using our program!")
             break
+
         # conditional statement if anything other than 1-5 is chosen
         else:
             print("Invalid option. Please try again.")
+
 
 csv_file_path = '/Users/sylvin/PycharmProjects/Project temp/seatplanx.csv'
 
