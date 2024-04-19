@@ -101,6 +101,9 @@ def main_menu(csv_file_path):
         elif choice == '2':
             # request for user input on which seat they intend to book
             seat_label = input("Enter seat label (e.g., '1A'): ")
+            name = input("Enter the customer's name: ")
+            email = input("Enter the customer's email: ")
+            customer_data = {'name': name, 'email': email}
             # if input seat is a seat that is available for booking
             # change status from Free to Reserved
             if booking_system.book_seat(seat_label):
