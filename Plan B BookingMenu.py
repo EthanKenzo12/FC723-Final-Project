@@ -117,9 +117,12 @@ class SeatBooking:
 
     # method to show all booked seats
     def show_booking_state(self):
-        # prints the current booking status of all seats in the system.
-        for seat, row in self.seats.iterrows():
-            print(f"{seat}:{row['Status']}")
+        # iterate over each item in the booking details dictionary
+        for seat_label, details in self.booking_details.items():
+            # retrieve the current status of the seat from the DataFrame
+            status = self.seats.at[seat_label, 'Status']
+            # print out the seat label, its status, and the booking reference to the console
+            print(f"Seat {seat_label} is {status}. Booking reference: {details['reference']}")
 
 
 # main menu tied to csv file to append changes saved to the file (if any)
