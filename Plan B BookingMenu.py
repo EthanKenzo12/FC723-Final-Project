@@ -10,7 +10,7 @@ class BookingReferenceGenerator:
     def __init__(self):
         # creation of a set to track the unique booking references generated
         self.generated_references = set()
-    
+
     # method to generate a unique booking reference
     def generate_unique_reference(self):
         while True:
@@ -29,8 +29,15 @@ class SeatBooking:
         Argument:
             csv_file_path (str): The path to the csv file containing seat information.
         """
+        # csv file path with seat information
         self.csv_file_path = csv_file_path
+        # attribute to load seat data from the csv file into a DataFrame
         self.seats = pd.read_csv(csv_file_path, index_col='Seat')
+        # attribute for the instance of the reference generator
+        self.reference_generator = BookingReferenceGenerator()
+        # attribute of dictionary to store booking details
+        self.booking_details = {}
+
 
     # method checks if a seat is available for booking
     def check_availability(self, seat_label):
@@ -162,6 +169,7 @@ def main_menu(csv_file_path):
             print("Invalid option. Please try again.")
 
 
+# csv file path
 csv_file_path = '/Users/sylvin/PycharmProjects/Project temp/seatplanx.csv'
 
 if __name__ == "__main__":
