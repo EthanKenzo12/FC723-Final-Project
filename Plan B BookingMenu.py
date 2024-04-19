@@ -115,7 +115,7 @@ class SeatBooking:
         else:
             return False
 
-# method to show all booked seats and the reference numbers assigned to it
+    # method to show all booked seats and the reference numbers assigned to it
     def show_booking_state(self):
         # iterate over each item in the booking details dictionary
         for seat_label, details in self.booking_details.items():
@@ -123,6 +123,24 @@ class SeatBooking:
             status = self.seats.at[seat_label, 'Status']
             # print out the seat label, its status, and the booking reference to the console
             print(f"Seat {seat_label} is {status}. Booking reference: {details['reference']}")
+
+    # method to check for availability of seats by rows 
+    def check_row_availability(self, row_number):
+        # available seats denoted by and empty list, which will be appended based on available seats
+        available_seats = []
+        # range of columns as denoted by letters
+        for col in 'ABCDEF':
+            # row_numbers (1-80) and col (letters A-E)
+            seat_label = f"{row_number}{col}"
+            try:
+                if self.check_availability(seat_label):
+                    available_seats.append(seat_label)
+            except KeyError:
+                continue
+        if available_seats:
+            print(f"The following seats are available in row {row_number}: {', '.join(available_seats)}")
+        else:
+            print(f"No available seats in row {row_number}")
 
 
 # main menu tied to csv file to append changes saved to the file (if any)
