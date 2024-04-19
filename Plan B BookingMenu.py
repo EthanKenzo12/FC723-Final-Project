@@ -1,6 +1,16 @@
 import pandas as pd
+import random
+import string
 
 pd.read_csv('/Users/sylvin/PycharmProjects/Project temp/seatplanx.csv')
+
+# creation of a class BookingReferenceGenerator
+# class will house a method to generate unique booking references
+# which can be tracked using a set
+class BookingReferenceGenerator:
+    def __init__(self):
+        # creation of a set to track the unique booking references generated
+        self.generated_references = set()
 
 
 class SeatBooking:
