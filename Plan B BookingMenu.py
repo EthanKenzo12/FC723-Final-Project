@@ -89,8 +89,7 @@ class SeatBooking:
         else:
             return False
 
-
-
+    # method to cancel booking and free seat if it was previously reserved
     def free_seat(self, seat_label):
         """Frees up a seat if it is currently reserved.
 
@@ -100,9 +99,18 @@ class SeatBooking:
         Returns:
             boolean: True if the seat was successfully freed, otherwise False.
         """
-        if self.seats.at[seat_label, 'Status'] == 'Reserved':
+        seat_label = seat_label.upper()
+        # conditional statement to proceed only if the seat is currently reserved
+        if self.seats.at[seat_label, 'Status'] == 'Reserved' and self.booking_details.get(seat_label, {}).get(
+                'reference') == booking_reference:
+            # update the status from Reserved to Free
             self.seats.at[seat_label, 'Status'] = 'Free'
+            # removes the booking detail
+            self.booking_details.pop(seat_label, None)  # Remove booking details
+            # saves the updated data to csv file
             self.seats.to_csv(self.csv_file_path)
+            # save the updated booking details to the JSON file
+            self.save_booking_details()
             return True
         else:
             return False
