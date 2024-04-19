@@ -124,7 +124,7 @@ class SeatBooking:
             # print out the seat label, its status, and the booking reference to the console
             print(f"Seat {seat_label} is {status}. Booking reference: {details['reference']}")
 
-    # method to check for availability of seats by rows 
+    # method to check for availability of seats by rows
     def check_row_availability(self, row_number):
         # available seats denoted by and empty list, which will be appended based on available seats
         available_seats = []
@@ -151,70 +151,92 @@ def main_menu(csv_file_path):
     # on a loop until function is terminated
     while True:
         print("\nMenu:")
-        print("1. Check availability of seat")
+        print("1. Check availability of seats.")
         print("2. Book a seat")
         print("3. Free a seat")
         print("4. Show booking state")
-        print("5. Exit program")
+        print("5. Exit")
         choice = input("Choose an option: ")
 
-        # option 1 for checking of seat
+        # sub-menu option 1 for checking of seat availability by row
         if choice == '1':
-            # checking of individual seat by row (number) and column (letter)
-            seat_label = input("Enter seat label (e.g., '1A'): ")
-            # condition if seat is not booked
-            if booking_system.check_availability(seat_label):
-                print("The seat is available.")
-            # condition if seat is booked
-            else:
-                print("Sorry this seat is not available.")
+            # sub-menu choices, 1 to continue and 0 to return to main menu
+            while True:
+                print("\nAvailability-Menu:")
+                print("1. Check availability by row number.")
+                print("0. Return to main menu.")
+                sub_choice = input("Choose an option: ")
 
-        # option 2 to book seat
+                if sub_choice == '1':
+                    row_number = input("Enter row number (e.g., '1'): ")
+                    booking_system.check_row_availability(row_number)
+                elif sub_choice == '0':
+                    break
+                else:
+                    print("Invalid option. Please try again.")
+
+        # sub-menu option 2 for booking of selected seat
         elif choice == '2':
-            # request for user input on which seat they intend to book
-            seat_label = input("Enter seat label (e.g., '1A'): ")
-            name = input("Enter the customer's name: ")
-            email = input("Enter the customer's email: ")
-            customer_data = {'name': name, 'email': email}
-            # if input seat is a seat that is available for booking
-            # change status from Free to Reserved
-            if booking_system.book_seat(seat_label, customer_data):
-                print("The seat has been booked.")
-            # conditional statement if the seat had already been booked
-            else:
-                print("Sorry this seat has already been booked.")
+            # sub-menu choices, 1 to continue and 0 to return to main menu
+            while True:
+                print("\nBooking-Menu:")
+                print("1. Proceed to booking page.")
+                print("0. Return to main menu.")
+                sub_choice = input("Choose an option: ")
 
-        # option 3 to cancel booking and free up the seat
+                # conditional statement to proceed with booking
+                # while prompting for user's name and email
+                if sub_choice == '1':
+                    seat_label = input("Enter seat label (e.g., '1A'): ")
+                    name = input("Enter your name: ")
+                    email = input("Enter your email: ")
+                    customer_data = {'name': name, 'email': email}
+                    if booking_system.book_seat(seat_label, customer_data):
+                        print("The seat has been booked.")
+                    else:
+                        print("Sorry! This seat has already been booked")
+                elif sub_choice == '0':
+                    break
+                else:
+                    print("Invalid option. Please try again.")
+
+        # sub-menu option 3 for cancellation of booked seat
         elif choice == '3':
-            # request for user input on which seat they had booked
-            seat_label = input("Enter seat label (e.g., '1A'): ")
-            # if input seat is a seat that has been booked
-            # change status from Reserved to Free
-            if booking_system.free_seat(seat_label):
-                print("The seat has been freed.")
-            # conditional statement if the seat was not booked
-            else:
-                print("Sorry this seat is not booked.")
+            while True:
+                print("\nCancellation-Menu:")
+                print("1. Continue to cancellation page.")
+                print("0. Return to main menu.")
+                sub_choice = input("Choose an option: ")
+                # conditional statement to proceed with cancellation provided seat and booking reference input
+                if sub_choice == '1':
+                    seat_label = input("Enter seat label (e.g., '1A'): ")
+                    booking_reference = input("Please enter your booking reference: ")
+                    if booking_system.free_seat(seat_label, booking_reference):
+                        print("The seat has been freed.")
+                    else:
+                        print("Sorry this seat cannot be freed at this time.")
+                elif sub_choice == '0':
+                    break
+                else:
+                    print("Invalid option. Please try again.")
 
-        # option 4 to show all current bookings
-        # allows for the viewing of which seats have been booked
         elif choice == '4':
+            # to show all current seats that have been booked and the reference associated with it
             booking_system.show_booking_state()
 
-        # option 5 to exit program
-        # option to be selected when all other options have been used to user satisfaction
         elif choice == '5':
-            print("Thank you for using our program!")
+            # exit function with a thank-you message.
+            booking_system.save_booking_details()
+            print("Thank you for using our system!")
             break
-
-        # conditional statement if anything other than 1-5 is chosen
         else:
             print("Invalid option. Please try again.")
 
-
+# csv file path
 csv_file_path = '/Users/sylvin/PycharmProjects/Project temp/seatplanx.csv'
 
 if __name__ == "__main__":
     # Entry point of the program when run as a script.
     # This sets the path to the CSV file and launches the main menu.
+    csv_file_path = '/Users/sylvin/PycharmProjects/Project temp/seatplanx.csv'
     main_menu(csv_file_path)
