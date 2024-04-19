@@ -1,4 +1,6 @@
 import pandas as pd
+import random
+import string
 
 
 # creation of a class BookingReferenceGenerator
@@ -8,6 +10,16 @@ class BookingReferenceGenerator:
     def __init__(self):
         # creation of a set to track the unique booking references generated
         self.generated_references = set()
+    
+    # method to generate a unique booking reference
+    def generate_unique_reference(self):
+        while True:
+            # creation of a reference consisting of 8 random uppercase letters and digits
+            reference = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            # conditional statement to ensure the reference has not already been generated prior
+            if reference not in self.generated_references:
+                self.generated_references.add(reference)
+                return reference
 
 
 class SeatBooking:
