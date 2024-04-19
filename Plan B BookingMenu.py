@@ -61,38 +61,32 @@ class SeatBooking:
         return self.seats.at[seat_label, 'Status'] == 'Free'
 
     # method to enable the booking of seats
-    def book_seat(self, seat_label):
+    def book_seat(self, seat_label, customer_data):
         """Checks if the specified seat is free.
 
         Argument:
             seat_label (str): The label of the seat to check.
+            customer data (dict): A dictionary containing customer information
 
         Returns:
             boolean: True if the seat is free, otherwise False.
         """
         # automatically converts seat label to uppercase to avoid case sensitivity issues.
         seat_label = seat_label.upper()
-        if self.check_availability(seat_label):
+        if self.seats.at[seat_label, 'Status'] not in ('X', 'S') and self.check_availability(seat_label):
+            # generation a unique booking reference
+            reference = self.reference_generator.generate_unique_reference()
+            # update the status from Free to Reserved
             self.seats.at[seat_label, 'Status'] = 'Reserved'
+            # stores the booking detail to be retrieved if needed
+            self.booking_details[seat_label] = {'reference': reference, 'customer_data': customer_data}
+            # saves the updated data to csv file
             self.seats.to_csv(self.csv_file_path)
+            print(f"Booking complete. Reference: {reference}")
             return True
         else:
             return False
 
-    # method for inability to book on specific seats
-    # checks and prevent booking if applied to (aisle - X) and (storage - S)
-    def can_not_book_seat(self, seat_label):
-        """Attempts to book a seat if it is available.
-
-        Argument:
-            seat_label (str): The label of the seat to book.
-
-        Returns:
-            boolean: True if the booking was successful, False if the seat was already booked.
-        """
-        if self.check_availability(seat_label):
-            self.seats.at[seat_label, 'Statis'] = 'X' and 'S'
-            return False
 
     # method to cancel booking and free seat if it was previously reserved
     def free_seat(self, seat_label):
