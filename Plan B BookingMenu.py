@@ -62,6 +62,8 @@ class SeatBooking:
         # indexing by the 'Seat' column to be easily viewed by user
         return self.seats.at[seat_label, 'Status'] == 'Free'
 
+    # method to enable the booking of seats
+    # has attributes to check and prevent booking if applied to (aisle - X) and (storage - S)
     def book_seat(self, seat_label):
         """Checks if the specified seat is free.
 
@@ -73,9 +75,16 @@ class SeatBooking:
         """
         # automatically converts seat label to uppercase to avoid case sensitivity issues.
         seat_label = seat_label.upper()
-        if self.check_availability(seat_label):
+        if self.seats.at[seat_label, 'Status'] not in ('X', 'S') and self.check_availability(seat_label):
+            # generation a unique booking reference
+            reference = self.reference_generator.generate_unique_reference()
+            # update the status from Free to Reserved
             self.seats.at[seat_label, 'Status'] = 'Reserved'
+            # stores the booking detail to be retrieved if needed
+            self.booking_details[seat_label] = {'reference': reference, 'customer_data': customer_data}
+            # saves the updated data to csv file
             self.seats.to_csv(self.csv_file_path)
+            print(f"Booking complete. Reference: {reference}")
             return True
         else:
             return False
