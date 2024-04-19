@@ -89,18 +89,7 @@ class SeatBooking:
         else:
             return False
 
-    def can_not_book_seat(self, seat_label):
-        """Attempts to book a seat if it is available.
 
-        Argument:
-            seat_label (str): The label of the seat to book.
-
-        Returns:
-            boolean: True if the booking was successful, False if the seat was already booked.
-        """
-        if self.check_availability(seat_label):
-            self.seats.at[seat_label, 'Statis'] = 'X' and 'S'
-            return False
 
     def free_seat(self, seat_label):
         """Frees up a seat if it is currently reserved.
