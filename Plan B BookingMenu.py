@@ -1,6 +1,7 @@
 import pandas as pd
 import random
 import string
+import sqlite3
 import json
 
 
@@ -24,8 +25,8 @@ class BookingReferenceGenerator:
 
 
 class SeatBooking:
-    def __init__(self, csv_file_path):
-        """initialises the seat booking system by reading seat data from a csvfile.
+    def __init__(self, csv_file_path, db_path):
+        """Initialises the seat booking system by reading seat data from a csvfile.
 
         Argument:
             csv_file_path (str): The path to the csv file containing seat information.
@@ -37,10 +38,34 @@ class SeatBooking:
         # attribute for the instance of the reference generator
         self.reference_generator = BookingReferenceGenerator()
         # attribute of dictionary to store booking details
-        self.booking_details = {}
+        self.db_path = db_path
+        # attribute to link to sqlite database
+        self.conn = sqlite3.connect(db_path)
+        # attribute to initialise database
+        self.init_db()
+        # attribute to load booking details from JSON file if it exists
+        self.load_booking_details()
+
+    # creation of method to initialise database and create table to store passnger information
+    def init_db(self):
+        # creation of a new SQLite table for bookings if it does not exist
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS bookings (
+                seat_label TEXT PRIMARY KEY,
+                reference TEXT,
+                first_name TEXT,
+                last_name TEXT,
+                passport_number TEXT,
+                email TEXT,
+                status TEXT
+            )
+        ''')
+        self.conn.commit()
 
     # method saves the current state of bookings to a json file
     def save_booking_details(self):
+        # save booking to json file for later retrival
         with open('booking_details.json', 'w') as f:
             json.dump(self.booking_details, f)
 
@@ -56,13 +81,20 @@ class SeatBooking:
 
     # method checks if a seat is available for booking
     def check_availability(self, seat_label):
+        """Check if the given seat is available for booking."""
         seat_label = seat_label.upper()
-        # indexing by the 'Seat' column to be easily viewed by user
-        return self.seats.at[seat_label, 'Status'] == 'Free'
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT status FROM bookings WHERE seat_label=?', (seat_label,))
+        result = cursor.fetchone()
+        # conditional statement if seat is not in bookings table, check the status in the DataFrame.
+        if result is None:
+            # If there is no entry in the bookings table, check the CSV file status
+            return self.seats.at[seat_label, 'Status'] == 'Free'
+        return result[0] == 'Free'
 
     # method to enable the booking of seats
     def book_seat(self, seat_label, customer_data):
-        """Checks if the specified seat is free.
+        """Attempt to book a seat for a customer if it is available.
 
         Argument:
             seat_label (str): The label of the seat to check.
@@ -73,18 +105,38 @@ class SeatBooking:
         """
         # automatically converts seat label to uppercase to avoid case sensitivity issues.
         seat_label = seat_label.upper()
+
+        # Check if the seat exists in the DataFrame before proceeding
+        if seat_label not in self.seats.index:
+            print(f"Error: Seat '{seat_label}' does not exist.")
+            return False
+
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT status FROM bookings WHERE seat_label=?', (seat_label,))
+        result = cursor.fetchone()
+        # Check if the seat is already booked
+        if result is not None:
+            print(f"Seat {seat_label} is already booked.")
+            return False
+
         if self.seats.at[seat_label, 'Status'] not in ('X', 'S') and self.check_availability(seat_label):
-            # generation a unique booking reference
             reference = self.reference_generator.generate_unique_reference()
-            # update the status from Free to Reserved
             self.seats.at[seat_label, 'Status'] = 'Reserved'
-            # stores the booking detail to be retrieved if needed
-            self.booking_details[seat_label] = {'reference': reference, 'customer_data': customer_data}
-            # saves the updated data to csv file
-            self.seats.to_csv(self.csv_file_path)
-            print(f"Booking complete. Reference: {reference}")
-            return True
+
+            try:
+                cursor.execute('''
+                    INSERT INTO bookings (seat_label, reference, first_name, last_name, passport_number, email, status)
+                    VALUES (?, ?, ?, ?, ?, ?, 'Reserved')
+                ''', (seat_label, reference, customer_data['first_name'], customer_data['last_name'],
+                      customer_data['passport_number'], customer_data['email']))
+                self.conn.commit()
+                print(f"Booking complete. Reference: {reference}")
+                return True
+            except sqlite3.IntegrityError as e:
+                print(f"A booking for seat {seat_label} already exists.")
+                return False
         else:
+            print(f"Seat {seat_label} cannot be booked.")
             return False
 
     # method to cancel booking and free seat if it was previously reserved
@@ -99,29 +151,34 @@ class SeatBooking:
         Returns:
             boolean: True if the seat was successfully freed, otherwise False.
         """
-        # conditional statement to proceed only if the seat is currently reserved
-        if self.seats.at[seat_label, 'Status'] == 'Reserved' and self.booking_details.get(seat_label, {}).get(
-                'reference') == booking_reference:
-            # update the status from Reserved to Free
+        seat_label = seat_label.upper()
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT reference FROM bookings WHERE seat_label=?', (seat_label,))
+        result = cursor.fetchone()
+        if result and result[0] == booking_reference:
+            # if there is a matche, delete the record from the database
+            cursor.execute("DELETE FROM bookings WHERE seat_label=?", (seat_label,))
+            self.conn.commit()
             self.seats.at[seat_label, 'Status'] = 'Free'
-            # removes the booking detail
-            self.booking_details.pop(seat_label, None)  # Remove booking details
-            # saves the updated data to csv file
             self.seats.to_csv(self.csv_file_path)
-            # save the updated booking details to the JSON file
-            self.save_booking_details()
+            print(f"Removing seat {seat_label} with Ref: {booking_reference} from the database.")
             return True
         else:
+            print(f"No matching booking reference found for seat {seat_label}, or the seat was not reserved.")
             return False
 
     # method to show all booked seats
     def show_booking_state(self):
-        # iterate over each item in the booking details dictionary
-        for seat_label, details in self.booking_details.items():
-            # retrieve the current status of the seat from the DataFrame
-            status = self.seats.at[seat_label, 'Status']
-            # print out the seat label, its status, and the booking reference to the console
-            print(f"Seat {seat_label} is {status}. Booking reference: {details['reference']}")
+        cursor = self.conn.cursor()
+        # Select only seats that are reserved and have a valid reference
+        cursor.execute(
+            'SELECT seat_label, status, reference FROM bookings WHERE status <> "Free" AND reference IS NOT NULL')
+        results = cursor.fetchall()
+        if results:
+            for row in results:
+                print(f"Seat {row[0]} is {row[1]}. Booking reference: {row[2]}")
+        else:
+            print("No booked seats.")
 
     # method to check for availability of seats by rows
     def check_row_availability(self, row_number):
@@ -144,8 +201,9 @@ class SeatBooking:
 
 # main menu tied to csv file to append changes saved to the file (if any)
 def main_menu(csv_file_path):
-    booking_system = SeatBooking(csv_file_path)
-
+    # data from use input to be saved into database
+    db_path = 'Booking_Information.db'
+    booking_system = SeatBooking(csv_file_path, db_path)
     # main menu options 1 - 5
     # on a loop until function is terminated
     while True:
@@ -187,13 +245,16 @@ def main_menu(csv_file_path):
                 # while prompting for user's name and email
                 if sub_choice == '1':
                     seat_label = input("Enter seat label (e.g., '1A'): ")
-                    name = input("Enter your name: ")
+                    first_name = input("Enter your first name: ")
+                    last_name = input("Enter your last name: ")
+                    passport_number = input("Enter your passport number: ")
                     email = input("Enter your email: ")
-                    customer_data = {'name': name, 'email': email}
-                    if booking_system.book_seat(seat_label, customer_data):
-                        print("The seat has been booked.")
-                    else:
-                        print("Sorry! This seat has already been booked")
+                    customer_data = {'first_name': first_name, 'last_name': last_name,
+                                     'passport_number': passport_number,
+                                     'email': email}
+                    booking_system.book_seat(seat_label, customer_data)
+
+                # return to main menu
                 elif sub_choice == '0':
                     break
                 else:
@@ -209,11 +270,13 @@ def main_menu(csv_file_path):
                 # conditional statement to proceed with cancellation provided seat and booking reference input
                 if sub_choice == '1':
                     seat_label = input("Enter seat label (e.g., '1A'): ")
-                    booking_reference = input("Please enter your booking reference: ")
+                    booking_reference = input("Enter your booking reference: "
+                                              "(Your booking reference is case-sensitive) ")
                     if booking_system.free_seat(seat_label, booking_reference):
                         print("The seat has been freed.")
                     else:
                         print("Sorry this seat cannot be freed at this time.")
+
                 elif sub_choice == '0':
                     break
                 else:
@@ -228,6 +291,7 @@ def main_menu(csv_file_path):
             booking_system.save_booking_details()
             print("Thank you for using our system!")
             break
+
         else:
             print("Invalid option. Please try again.")
 
