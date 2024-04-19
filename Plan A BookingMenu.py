@@ -72,8 +72,12 @@ class SeatBooking:
     # method to show all booked seats
     def show_booking_state(self):
         # prints the current booking status of all seats in the system.
-        for seat, row in self.seats.iterrows():
-            print(f"{seat}:{row['Status']}")
+        reserved_seats = self.seats[self.seats['Status'] == 'Reserved']
+        if not reserved_seats.empty:
+            for seat, row in reserved_seats.iterrows():
+                print(f"{seat}: {row['Status']}")
+        else:
+            print("No seats are currently reserved.")
 
 
 # main menu tied to csv file to append changes saved to the file (if any)
