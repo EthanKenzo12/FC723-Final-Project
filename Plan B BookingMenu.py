@@ -1,6 +1,7 @@
 import pandas as pd
 import random
 import string
+import json
 
 
 # creation of a class BookingReferenceGenerator
@@ -38,6 +39,20 @@ class SeatBooking:
         # attribute of dictionary to store booking details
         self.booking_details = {}
 
+    # method saves the current state of bookings to a json file
+    def save_booking_details(self):
+        with open('booking_details.json', 'w') as f:
+            json.dump(self.booking_details, f)
+
+    # method loads the booking details from a json file
+    def load_booking_details(self):
+        # try handling in the event there is a file to load the details of saved bookings
+        try:
+            with open('booking_details.json', 'r') as f:
+                self.booking_details = json.load(f)
+        except FileNotFoundError:
+            # exception handling if the file doesn't exist to initialise to an empty dict
+            self.booking_details = {}
 
     # method checks if a seat is available for booking
     def check_availability(self, seat_label):
