@@ -1,6 +1,6 @@
 import pandas as pd
 
-pd.read_csv('/Users/sylvin/PycharmProjects/Project temp/seatplanx.csv')
+pd.read_csv('/Users/sylvin/PycharmProjects/FC723 Project 3/FC723-Final-Project/seatplanx.csv')
 
 
 class SeatBooking:
@@ -142,7 +142,7 @@ def main_menu(csv_file_path):
             print("Invalid option. Please try again.")
 
 
-csv_file_path = '/Users/sylvin/PycharmProjects/Project temp/seatplanx.csv'
+csv_file_path = '/Users/sylvin/PycharmProjects/FC723 Project 3/FC723-Final-Project/seatplanx.csv'
 
 if __name__ == "__main__":
     # Entry point of the program when run as a script.
