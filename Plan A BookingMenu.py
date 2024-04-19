@@ -19,6 +19,7 @@ class SeatBooking:
         # indexing by the 'Seat' column to be easily viewed by user
         return self.seats.at[seat_label, 'Status'] == 'Free'
 
+    # method to enable the booking of seats
     def book_seat(self, seat_label):
         """Checks if the specified seat is free.
 
@@ -36,7 +37,8 @@ class SeatBooking:
             return True
         else:
             return False
-
+    # method for inability to book on specific seats
+    # checks and prevent booking if applied to (aisle - X) and (storage - S)
     def can_not_book_seat(self, seat_label):
         """Attempts to book a seat if it is available.
 
@@ -50,6 +52,7 @@ class SeatBooking:
             self.seats.at[seat_label, 'Statis'] = 'X' and 'S'
             return False
 
+    # method to cancel booking and free seat if it was previously reserved
     def free_seat(self, seat_label):
         """Frees up a seat if it is currently reserved.
 
@@ -66,6 +69,7 @@ class SeatBooking:
         else:
             return False
 
+    # method to show all booked seats
     def show_booking_state(self):
         # prints the current booking status of all seats in the system.
         for seat, row in self.seats.iterrows():
