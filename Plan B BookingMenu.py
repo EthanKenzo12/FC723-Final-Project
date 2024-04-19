@@ -159,7 +159,7 @@ def main_menu(csv_file_path):
             customer_data = {'name': name, 'email': email}
             # if input seat is a seat that is available for booking
             # change status from Free to Reserved
-            if booking_system.book_seat(seat_label):
+            if booking_system.book_seat(seat_label, customer_data):
                 print("The seat has been booked.")
             # conditional statement if the seat had already been booked
             else:
