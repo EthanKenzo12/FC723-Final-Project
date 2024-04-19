@@ -13,6 +13,7 @@ class SeatBooking:
         self.csv_file_path = csv_file_path
         self.seats = pd.read_csv(csv_file_path, index_col='Seat')
 
+    # method checks if a seat is available for booking
     def check_availability(self, seat_label):
         seat_label = seat_label.upper()
         # indexing by the 'Seat' column to be easily viewed by user
