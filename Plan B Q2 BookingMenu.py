@@ -3,6 +3,20 @@ import random
 import string
 import sqlite3
 import json
+import time
+
+
+# creation of function to return a greeting based on the current time
+def time_gated_greeting():
+    # to get time of day based on hour
+    current_hour = time.localtime().tm_hour
+    # conditional statements for the ties pf days
+    if 5 <= current_hour < 12:
+        return "Good Morning"
+    elif 12 <= current_hour < 18:
+        return "Good Afternoon"
+    else:
+        return "Good Evening"
 
 
 # creation of a class BookingReferenceGenerator
@@ -211,8 +225,9 @@ def main_menu(csv_file_path):
     booking_system = SeatBooking(csv_file_path, db_path)
     # main menu options 1 - 5
     # on a loop until function is terminated
+    print(f"{time_gated_greeting()}, Welcome to the Airline Booking System!")
     while True:
-        print("\nMenu:")
+        print("Menu:")
         print("1. Check availability of seats.")
         print("2. Book a seat")
         print("3. Free a seat")
@@ -249,8 +264,7 @@ def main_menu(csv_file_path):
                 # conditional statement to proceed with booking
                 # while prompting for user's name and email
                 if sub_choice == '1':
-                    seat_label = input("Enter seat label (e.g., '1A'): ")
-                    seat_number = seat_label.upper()
+                    seat_label = input("Enter seat label (e.g., '1A'): ").upper()
                     # checking for seat availability before proceeding with remaining details
                     if not booking_system.check_availability(seat_label):
                         print("Sorry that seat has already been booked")
@@ -281,8 +295,9 @@ def main_menu(csv_file_path):
                 # conditional statement to proceed with cancellation provided seat and booking reference input
                 if sub_choice == '1':
                     passport_number = input("Enter your passport number: ")
-                    booking_reference = input("Enter your booking reference: "
-                                              "(Your booking reference is case-sensitive) ")
+                    booking_reference = input("Enter your booking reference "
+                                              "(Your booking reference is case-sensitive): "
+                                              " ")
                     success, name = booking_system.free_seat(passport_number, booking_reference)
                     if success:
                         print(f"Hello {name}, your booking has been cancelled.")
