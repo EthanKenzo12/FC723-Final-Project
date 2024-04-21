@@ -1,6 +1,6 @@
 import pandas as pd
 
-pd.read_csv('/Users/sylvin/PycharmProjects/FC723 Project 3/FC723-Final-Project/seatplanx.csv')
+pd.read_csv('/Users/sylvin/PycharmProjects/FC723 Project 3/FC723-Final-Project/planAseatplan.csv')
 
 
 class SeatBooking:
@@ -151,5 +151,5 @@ def main_menu(csv_file_path):
 if __name__ == "__main__":
     # Entry point of the program when run as a script.
     # This sets the path to the CSV file and launches the main menu.
-    csv_file_path = '/Users/sylvin/PycharmProjects/FC723 Project 3/FC723-Final-Project/seatplanx.csv'
+    csv_file_path = '/Users/sylvin/PycharmProjects/FC723 Project 3/FC723-Final-Project/planAseatplan.csv'
     main_menu(csv_file_path)
