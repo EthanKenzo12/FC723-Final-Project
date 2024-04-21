@@ -250,6 +250,12 @@ def main_menu(csv_file_path):
                 # while prompting for user's name and email
                 if sub_choice == '1':
                     seat_label = input("Enter seat label (e.g., '1A'): ")
+                    seat_number = seat_label.upper()
+                    # checking for seat availability before proceeding with remaining details
+                    if not booking_system.check_availability(seat_label):
+                        print("Sorry that seat has already been booked")
+                        continue
+                    # proceeds with the rest of the inputs
                     first_name = input("Enter your first name: ")
                     last_name = input("Enter your last name: ")
                     passport_number = input("Enter your passport number: ")
