@@ -140,31 +140,36 @@ class SeatBooking:
             return False
 
     # method to cancel booking and free seat if it was previously reserved
-    def free_seat(self, seat_label, booking_reference):
+    def free_seat(self, passport_number, booking_reference):
         """Frees up a seat if it is currently reserved.
 
         Argument:
-            seat_label (str): The label of the seat to free.
-            booking_reference (str): 8 character booking given to passengers on successful booking
-
+            passport_number (str): The passport number associated with the booking.
+            booking_reference (str): The booking reference given to passengers on successful booking.
 
         Returns:
-            boolean: True if the seat was successfully freed, otherwise False.
+            tuple: A boolean indicating success, and a string with a message or the first name of the customer.
         """
-        seat_label = seat_label.upper()
         cursor = self.conn.cursor()
-        cursor.execute('SELECT reference FROM bookings WHERE seat_label=?', (seat_label,))
+        cursor.execute('''SELECT seat_label, first_name FROM bookings
+                        WHERE passport_number=? AND reference=?''',
+                       (passport_number, booking_reference))
         result = cursor.fetchone()
-        if result and result[0] == booking_reference:
-            # if there is a matche, delete the record from the database
-            cursor.execute("DELETE FROM bookings WHERE seat_label=?", (seat_label,))
+        if result:
+            # unpacks results directly
+            seat_label, first_name = result
+            # if there is a match, delete the record from the database
+            cursor.execute('''DELETE FROM bookings 
+            WHERE passport_number=? AND reference=?''',
+                           (passport_number, booking_reference))
             self.conn.commit()
+            # update return status to free
             self.seats.at[seat_label, 'Status'] = 'Free'
             self.seats.to_csv(self.csv_file_path)
             print(f"Removing seat {seat_label} with Ref: {booking_reference} from the database.")
-            return True
+            return True, first_name
         else:
-            print(f"No matching booking reference found for seat {seat_label}, or the seat was not reserved.")
+            print(f"No matching booking reference found for the provided details, or the seat was not reserved.")
             return False
 
     # method to show all booked seats
@@ -269,14 +274,15 @@ def main_menu(csv_file_path):
                 sub_choice = input("Choose an option: ")
                 # conditional statement to proceed with cancellation provided seat and booking reference input
                 if sub_choice == '1':
-                    seat_label = input("Enter seat label (e.g., '1A'): ")
+                    passport_number = input("Enter your passport number: ")
                     booking_reference = input("Enter your booking reference: "
                                               "(Your booking reference is case-sensitive) ")
-                    if booking_system.free_seat(seat_label, booking_reference):
-                        print("The seat has been freed.")
+                    success, name = booking_system.free_seat(passport_number, booking_reference)
+                    if success:
+                        print(f"Hello {name}, your booking has been cancelled.")
                     else:
                         print("Sorry this seat cannot be freed at this time.")
-
+                    break
                 elif sub_choice == '0':
                     break
                 else:
