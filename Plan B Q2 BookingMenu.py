@@ -297,10 +297,10 @@ def main_menu(csv_file_path):
 
 
 # csv file path
-csv_file_path = '/Users/sylvin/PycharmProjects/FC723 Project 3/FC723-Final-Project/seatplanx.csv'
+csv_file_path = '/planbseatplan.csv'
 
 if __name__ == "__main__":
     # Entry point of the program when run as a script.
     # This sets the path to the CSV file and launches the main menu.
-    csv_file_path = '/Users/sylvin/PycharmProjects/FC723 Project 3/FC723-Final-Project/seatplanx.csv'
+    csv_file_path = '/planbseatplan.csv'
     main_menu(csv_file_path)
